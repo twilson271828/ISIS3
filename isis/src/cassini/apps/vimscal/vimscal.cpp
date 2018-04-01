@@ -8,6 +8,9 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QHash>
+#include <QRegExp>
+#include <QString>
 
 #include "Camera.h"
 #include "EndianSwapper.h"
@@ -26,6 +29,7 @@
 #include "Statistics.h"
 #include "Table.h"
 #include "UserInterface.h"
+#include "vimscalUtil.h"
 
 using namespace Isis;
 using namespace std;
@@ -52,6 +56,7 @@ vector<QString> tempFiles;
 //! solar remove coefficient
 double solarRemoveCoefficient;
 
+QMap<int,QString> g_calFiles;
 //! The calibration file containing multiplier information.
 static Pvl g_configFile;
 
@@ -60,6 +65,12 @@ static double g_solar(1.0);
 static double g_ir(1.0);
 static double g_vis(1.0);
 static double g_wavecal(1.0);
+static int g_decimilliyear(1);
+
+
+QString g_calibration("RC20");
+QString g_filePrefix("");
+
 
 //! The calibration version.  It's the name of the directory
 //! in $cassini/calibration/vims where all of the radiometric
@@ -74,6 +85,9 @@ bool iof;
 bool g_visBool;
 
 QString g_oCubeName;
+
+void findFilePrefix(int secs, QString &filePrefix);
+void generateCalibrationFileMap(QMap<int,QString> &hashTable);
 
 void calculateDarkCurrent(Cube *);
 void calculateVisDarkCurrent(Cube *);
@@ -100,6 +114,8 @@ PvlGroup calibInfo;
 void IsisMain() {
   UserInterface &ui = Application::GetUserInterface();
 
+  generateCalibrationFileMap(g_calFiles);
+
   //load the appropriate multipliers and the correct calibration version
 
   tempFiles.clear();
@@ -111,6 +127,8 @@ void IsisMain() {
   solarRemoveCoefficient = 1.0;
   iof = (ui.GetString("UNITS") == "IOF");
 
+  g_calibration = ui.GetString("CALIBRATION");
+
   calibInfo = PvlGroup("RadiometricCalibration");
 
   loadCalibrationValues();
@@ -120,7 +138,11 @@ void IsisMain() {
   PvlGroup &inst = icube->group("Instrument");
 
 
-  g_visBool = (inst["Channel"][0] != "IR");
+  g_visBool = (inst["Channel"][0] != "IR"); 
+  int secs = (int)(QString(inst["NativeStartTime"]).toDouble());
+  qDebug() <<"Secs:  " << secs;
+  findFilePrefix(secs,g_filePrefix);
+  qDebug() << "g_filePrefix=" << g_filePrefix;
 
   bool isVims = true;
 
@@ -211,18 +233,111 @@ void IsisMain() {
   tempFiles.clear();
 }
 
+void findFilePrefix(int secs,QString &filePrefix) {
+
+  QList<int> keys = g_calFiles.keys();
+  double years = secs/31557600.0;
+  years = years + 1958.0;
+
+  int decimilliyear =int(years*10000);
+  //double decimilliyear = years*1000;
+
+  
+  for ( int i =0; i < keys.count(); i++ ) {
+
+    if (keys[i] > decimilliyear) {
+      filePrefix = g_calFiles.value(keys[i-1]);
+
+
+
+      return;
+
+    }
+
+  }
+
+  filePrefix="Not_found";
+  qDebug() << decimilliyear << " was not in the time range of the calibration files.";
+
+}
+
+
+void generateCalibrationFileMap(QMap<int, QString> &fileMap) {
+
+
+
+    fileMap[19996000] = "VIMS1999.6000";
+    fileMap[20000640] = "VIMS2000.0640";
+    fileMap[20003500] = "VIMS2000.3500";
+    fileMap[20006300] = "VIMS2000.6300";
+    fileMap[20006950] = "VIMS2000.6950";
+    fileMap[20007430] = "VIMS2000.7430";
+    fileMap[20007760] = "VIMS2000.7760";
+    fileMap[20008050] = "VIMS2000.8050";
+    fileMap[20008240] = "VIMS2000.8240";
+    fileMap[20008420] = "VIMS2000.8420";
+    fileMap[20008560] = "VIMS2000.8560";
+    fileMap[20008680] = "VIMS2000.8680";
+    fileMap[20008780] = "VIMS2000.8780";
+    fileMap[20008840] = "VIMS2000.8840";
+    fileMap[20008940] = "VIMS2000.8940";
+    fileMap[20009030] = "VIMS2000.9030";
+    fileMap[20009110] = "VIMS2000.9110";
+    fileMap[20009180] = "VIMS2000.9180";
+    fileMap[20009250] = "VIMS2000.9250";
+    fileMap[20009310] = "VIMS2000.9310";
+    fileMap[20009360] = "VIMS2000.9360";
+    fileMap[20009420] = "VIMS2000.9420";
+    fileMap[20009470] = "VIMS2000.9470";
+    fileMap[20009520] = "VIMS2000.9520";
+    fileMap[20009560] = "VIMS2000.9560";
+    fileMap[20009610] = "VIMS2000.9610";
+    fileMap[20011200] = "VIMS2001.1200";
+    fileMap[20013000] = "VIMS2001.3000";
+    fileMap[20015000] = "VIMS2001.5000";
+    fileMap[20020000] = "VIMS2002-2005";
+    fileMap[20030000] = "VIMS2002-2005";
+    fileMap[20040000] = "VIMS2002-2005";
+    fileMap[20050000] = "VIMS2002-2005";
+    fileMap[20055000] = "VIMS2005.5000";
+    fileMap[20060000] = "VIMS2006.0000";
+    fileMap[20065000] = "VIMS2006.5000";
+    fileMap[20070000] = "VIMS2007.0000";
+    fileMap[20075000] = "VIMS2007.5000";
+    fileMap[20080000] = "VIMS2008.0000";
+    fileMap[20085000] = "VIMS2008.5000";
+    fileMap[20090000] = "VIMS2009.0000";
+    fileMap[20095000] = "VIMS2009.5000";
+    fileMap[20100000] = "VIMS2010.0000";
+    fileMap[20105000] = "VIMS2010.5000";
+    fileMap[20110000] = "VIMS2011.0000";
+    fileMap[20115000] = "VIMS2011.5000";
+    fileMap[20120000] = "VIMS2012.0000";
+    fileMap[20125000] = "VIMS2012.5000";
+    fileMap[20130000] = "VIMS2013.0000";
+    fileMap[20135000] = "VIMS2013.5000";
+    fileMap[20140000] = "VIMS2014.0000";
+    fileMap[20143000] = "VIMS2014.3000";
+    fileMap[20145000] = "VIMS2014.5000";
+    fileMap[20150000] = "VIMS2015.0000";
+    fileMap[20155000] = "VIMS2015.5000";
+    fileMap[20160000] = "VIMS2016.0000";
+    fileMap[20165000] = "VIMS2016.5000";
+    fileMap[20170000] = "VIMS2017.0000";
+    fileMap[20175000] = "VIMS2017.5000";
+    fileMap[20178000] = "VIMS2017.8000";
+    fileMap[20180000] = "VIMS2017.8000";
+
+
+}
 
 void normalize(Buffer &in,Buffer &out) {
 
   double normalizer = in[54];
 
-
         for (int i =0; i < in.size(); i++)  {
-
           if (!IsSpecial(in[i])) {
-
            out[i] = in[i]/normalizer;
-
           }
           else{
               out[i]=in[i];
@@ -289,11 +404,14 @@ void calibrate(vector<Buffer *> &inBuffers, vector<Buffer *> &outBuffers) {
     }
 
 
+
+
     //Convert to I/F/  Equation (3) in the white paper
     if (iof && solarRemoveBuffer && !IsSpecial((*outBuffer)[i])) {
       (*outBuffer)[i] = (*outBuffer)[i] /( g_solar*(*solarRemoveBuffer)[i]
                                            / solarRemoveCoefficient) * Isis::PI  ;
     }
+
 
   }
 }
@@ -397,9 +515,19 @@ void calculateSolarRemove(Cube *icube, ProcessByLine *p) {
 
   CubeAttributeInput iatt(attributes);
 
+
+
   //QString solarFilePath = "$cassini/calibration/vims/solar_v????.cub";
   QString solarFilePath = "$cassini/calibration/vims/"+calVersion+
      "/solar-spectrum/"+"solar."+yearString+"_v????.cub";
+
+  if (g_calibration=="RC20") {
+
+    solarFilePath = "$cassini/calibration/vims/"+calVersion+
+       "/solar-spectrum/"+g_filePrefix+".solar_v????.cub";
+
+
+  }
 
   FileName solarFileName(solarFilePath);
 
@@ -419,8 +547,14 @@ void calculateSolarRemove(Cube *icube, ProcessByLine *p) {
  */
 void loadCalibrationValues() {
 
-  FileName calibFile("$cassini/calibration/vims/vimsCalibration????.trn");
+  FileName calibFile("$cassini/calibration/vims/vimsRC20_????.trn");
   calibFile = calibFile.highestVersion();
+  if (g_calibration == "RC19"){
+    FileName calibFile("$cassini/calibration/vims/vimsCalibration????.trn");
+    calibFile = calibFile.highestVersion();
+  }
+
+
 
   //Pvl configFile;
   g_configFile.read(calibFile.expanded());
@@ -465,8 +599,18 @@ void updateWavelengths(Cube *icube) {
   QString bandwidthFile = "$cassini/calibration/vims/"+calVersion+"/band-wavelengths/wavelengths."+
       yearString+"_v????.cub";
 
+  if(g_calibration == "RC20") {
+    bandwidthFile = "$cassini/calibration/vims/"+calVersion+"/band-wavelengths/"+g_filePrefix
+        +".wavelengths_v????.cub";
+  }
+
   QString averageBandwidthFile = "$cassini/calibration/vims/"+calVersion+"/band-wavelengths/"+
       "wavelengths_average_v????.cub";
+
+  if(g_calibration == "RC20") {
+    averageBandwidthFile = "$cassini/calibration/vims/"+calVersion+
+        "/band-wavelengths/VIMS.wavelengths.average_v????.cub";
+  }
 
 
   FileName bandwidthFileName = FileName(bandwidthFile);
@@ -615,6 +759,11 @@ void calculateSpecificEnergy(Cube *icube) {
 
   QString specEnergyFile = "$cassini/calibration/vims/"+calVersion+"/RC19-mults/RC19."
       +yearString+"_v????.cub";
+  if (g_calibration == "RC20") {
+    specEnergyFile = "$cassini/calibration/vims/"+calVersion+"/RC19-mults/"+g_filePrefix+
+        ".calibration.multiplier.RC19_v????.cub";
+
+  }
 
 
   //B multiplier
@@ -622,6 +771,12 @@ void calculateSpecificEnergy(Cube *icube) {
 
   QString waveCalFile = "$cassini/calibration/vims/"+calVersion+"/wave-cal/wave.cal."+
       yearString+"_v????.cub";
+
+  if (g_calibration == "RC20") {
+    waveCalFile = "$cassini/calibration/vims/"+calVersion+"/wave-cal/"+g_filePrefix+
+        ".wave-photon-cal_v????.cub";
+
+  }
 
 
   FileName specEnergyFileName(specEnergyFile);
