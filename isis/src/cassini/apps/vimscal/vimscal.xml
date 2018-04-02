@@ -209,6 +209,28 @@ xsi:noNamespaceSchemaLocation=
         </description>
         <default><item>true</item></default>
       </parameter>
+      <parameter name = "CALIBRATION">
+        <type>string</type>
+        <brief>RC19 files</brief>
+        <description>
+        </description>
+        <default><item>RC19</item></default>
+
+        <list>
+          <option value="RC19">
+            <brief></brief>
+            <description>
+
+            </description>
+            </option>
+            <option value="RC20">
+              <brief></brief>
+              <description>
+
+              </description>
+          </option>
+        </list>
+      </parameter>
     </group>
   </groups>
 </application>
