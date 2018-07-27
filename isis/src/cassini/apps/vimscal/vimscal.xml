@@ -209,6 +209,40 @@ xsi:noNamespaceSchemaLocation=
         </description>
         <default><item>true</item></default>
       </parameter>
+      <parameter name = "CALIBRATION">
+        <type>string</type>
+        <brief>RC19 files</brief>
+        <description>
+        </description>
+        <default><item>RC20Final</item></default>
+
+        <list>
+        <option value="Original">
+          <brief></brief>
+          <description>
+            The original set of calibration files which do not account for spectral drift.
+          </description>
+          </option>
+          <option value="RC19">
+            <brief></brief>
+            <description>
+              First calibration files to account for spectral drift.
+            </description>
+            </option>
+            <option value="RC20">
+              <brief></brief>
+              <description>
+                Updated calibration files accounting for spectral drift.
+              </description>
+            </option>
+            <option value="RC20Final">
+              <brief></brief>
+              <description>
+                Final calibration files for the mission.
+              </description>
+            </option>
+          </list>
+      </parameter>
     </group>
   </groups>
 </application>

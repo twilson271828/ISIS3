@@ -8,6 +8,9 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QHash>
+#include <QRegExp>
+#include <QString>
 
 #include "Camera.h"
 #include "EndianSwapper.h"
@@ -26,6 +29,7 @@
 #include "Statistics.h"
 #include "Table.h"
 #include "UserInterface.h"
+#include "vimscalUtil.h"
 
 using namespace Isis;
 using namespace std;
@@ -52,6 +56,7 @@ vector<QString> tempFiles;
 //! solar remove coefficient
 double solarRemoveCoefficient;
 
+QMap<int,QString> g_calFiles;
 //! The calibration file containing multiplier information.
 static Pvl g_configFile;
 
@@ -61,10 +66,17 @@ static double g_ir(1.0);
 static double g_vis(1.0);
 static double g_wavecal(1.0);
 
+
+
+QString g_calibration("RC20FINAL");
+QString g_filePrefix("");
+
+
 //! The calibration version.  It's the name of the directory
 //! in $cassini/calibration/vims where all of the radiometric
 //! calibration cubes are kept.
-QString calVersion;
+//QString calVersion;
+
 QString g_startTime;
 
 //! Output in I/F units
@@ -74,6 +86,9 @@ bool iof;
 bool g_visBool;
 
 QString g_oCubeName;
+
+void findFilePrefix(int secs, QString &filePrefix);
+void generateCalibrationFileMap(QMap<int,QString> &hashTable);
 
 void calculateDarkCurrent(Cube *);
 void calculateVisDarkCurrent(Cube *);
@@ -100,6 +115,8 @@ PvlGroup calibInfo;
 void IsisMain() {
   UserInterface &ui = Application::GetUserInterface();
 
+  generateCalibrationFileMap(g_calFiles);
+
   //load the appropriate multipliers and the correct calibration version
 
   tempFiles.clear();
@@ -111,16 +128,26 @@ void IsisMain() {
   solarRemoveCoefficient = 1.0;
   iof = (ui.GetString("UNITS") == "IOF");
 
+  g_calibration = ui.GetString("CALIBRATION");
+
+  qDebug() << "g_calibration="<<g_calibration;
+
   calibInfo = PvlGroup("RadiometricCalibration");
 
   loadCalibrationValues();
+
 
   ProcessByLine p;
   Cube *icube = p.SetInputCube("FROM");
   PvlGroup &inst = icube->group("Instrument");
 
 
-  g_visBool = (inst["Channel"][0] != "IR");
+  g_visBool = (inst["Channel"][0] != "IR"); 
+  int secs = (int)(QString(inst["NativeStartTime"]).toDouble());
+  //qDebug() <<"Secs:  " << secs;
+  findFilePrefix(secs,g_filePrefix);
+  //qDebug() << "g_filePrefix=" << g_filePrefix;
+
 
   bool isVims = true;
 
@@ -165,14 +192,21 @@ void IsisMain() {
   calibInfo += PvlKeyword("OutputUnits", ((iof) ? "I/F" : "Specific Energy"));
 
   // done first since it's likely to cause an error if one exists
+
+
   calculateSolarRemove(icube, &p);
+
 
   if(ui.GetBoolean("DARK"))
     calculateDarkCurrent(icube);
 
-  chooseFlatFile(icube, &p);
+  chooseFlatFile(icube, &p); 
   calculateSpecificEnergy(icube);
-  updateWavelengths(icube);
+
+  if (g_calibration != "ORIGINAL") {
+
+    updateWavelengths(icube);
+  }
 
   Cube *outCube = p.SetOutputCube("TO");
   g_oCubeName = outCube->fileName();
@@ -211,18 +245,111 @@ void IsisMain() {
   tempFiles.clear();
 }
 
+void findFilePrefix(int secs,QString &filePrefix) {
+
+  QList<int> keys = g_calFiles.keys();
+  double years = secs/31557600.0;
+  years = years + 1958.0;
+
+  int decimilliyear =int(years*10000);
+  //double decimilliyear = years*1000;
+
+  
+  for ( int i =0; i < keys.count(); i++ ) {
+
+    if (keys[i] > decimilliyear) {
+      filePrefix = g_calFiles.value(keys[i-1]);
+
+
+
+      return;
+
+    }
+
+  }
+
+  filePrefix="Not_found";
+  //qDebug() << decimilliyear << " was not in the time range of the calibration files.";
+
+}
+
+
+void generateCalibrationFileMap(QMap<int, QString> &fileMap) {
+
+
+
+    fileMap[19996000] = "VIMS1999.6000";
+    fileMap[20000640] = "VIMS2000.0640";
+    fileMap[20003500] = "VIMS2000.3500";
+    fileMap[20006300] = "VIMS2000.6300";
+    fileMap[20006950] = "VIMS2000.6950";
+    fileMap[20007430] = "VIMS2000.7430";
+    fileMap[20007760] = "VIMS2000.7760";
+    fileMap[20008050] = "VIMS2000.8050";
+    fileMap[20008240] = "VIMS2000.8240";
+    fileMap[20008420] = "VIMS2000.8420";
+    fileMap[20008560] = "VIMS2000.8560";
+    fileMap[20008680] = "VIMS2000.8680";
+    fileMap[20008780] = "VIMS2000.8780";
+    fileMap[20008840] = "VIMS2000.8840";
+    fileMap[20008940] = "VIMS2000.8940";
+    fileMap[20009030] = "VIMS2000.9030";
+    fileMap[20009110] = "VIMS2000.9110";
+    fileMap[20009180] = "VIMS2000.9180";
+    fileMap[20009250] = "VIMS2000.9250";
+    fileMap[20009310] = "VIMS2000.9310";
+    fileMap[20009360] = "VIMS2000.9360";
+    fileMap[20009420] = "VIMS2000.9420";
+    fileMap[20009470] = "VIMS2000.9470";
+    fileMap[20009520] = "VIMS2000.9520";
+    fileMap[20009560] = "VIMS2000.9560";
+    fileMap[20009610] = "VIMS2000.9610";
+    fileMap[20011200] = "VIMS2001.1200";
+    fileMap[20013000] = "VIMS2001.3000";
+    fileMap[20015000] = "VIMS2001.5000";
+    fileMap[20020000] = "VIMS2002-2005";
+    fileMap[20030000] = "VIMS2002-2005";
+    fileMap[20040000] = "VIMS2002-2005";
+    fileMap[20050000] = "VIMS2002-2005";
+    fileMap[20055000] = "VIMS2005.5000";
+    fileMap[20060000] = "VIMS2006.0000";
+    fileMap[20065000] = "VIMS2006.5000";
+    fileMap[20070000] = "VIMS2007.0000";
+    fileMap[20075000] = "VIMS2007.5000";
+    fileMap[20080000] = "VIMS2008.0000";
+    fileMap[20085000] = "VIMS2008.5000";
+    fileMap[20090000] = "VIMS2009.0000";
+    fileMap[20095000] = "VIMS2009.5000";
+    fileMap[20100000] = "VIMS2010.0000";
+    fileMap[20105000] = "VIMS2010.5000";
+    fileMap[20110000] = "VIMS2011.0000";
+    fileMap[20115000] = "VIMS2011.5000";
+    fileMap[20120000] = "VIMS2012.0000";
+    fileMap[20125000] = "VIMS2012.5000";
+    fileMap[20130000] = "VIMS2013.0000";
+    fileMap[20135000] = "VIMS2013.5000";
+    fileMap[20140000] = "VIMS2014.0000";
+    fileMap[20143000] = "VIMS2014.3000";
+    fileMap[20145000] = "VIMS2014.5000";
+    fileMap[20150000] = "VIMS2015.0000";
+    fileMap[20155000] = "VIMS2015.5000";
+    fileMap[20160000] = "VIMS2016.0000";
+    fileMap[20165000] = "VIMS2016.5000";
+    fileMap[20170000] = "VIMS2017.0000";
+    fileMap[20175000] = "VIMS2017.5000";
+    fileMap[20178000] = "VIMS2017.8000";
+    fileMap[20180000] = "VIMS2017.8000";
+
+
+}
 
 void normalize(Buffer &in,Buffer &out) {
 
   double normalizer = in[54];
 
-
         for (int i =0; i < in.size(); i++)  {
-
           if (!IsSpecial(in[i])) {
-
            out[i] = in[i]/normalizer;
-
           }
           else{
               out[i]=in[i];
@@ -289,11 +416,14 @@ void calibrate(vector<Buffer *> &inBuffers, vector<Buffer *> &outBuffers) {
     }
 
 
+
+
     //Convert to I/F/  Equation (3) in the white paper
     if (iof && solarRemoveBuffer && !IsSpecial((*outBuffer)[i])) {
       (*outBuffer)[i] = (*outBuffer)[i] /( g_solar*(*solarRemoveBuffer)[i]
                                            / solarRemoveCoefficient) * Isis::PI  ;
     }
+
 
   }
 }
@@ -397,13 +527,27 @@ void calculateSolarRemove(Cube *icube, ProcessByLine *p) {
 
   CubeAttributeInput iatt(attributes);
 
-  //QString solarFilePath = "$cassini/calibration/vims/solar_v????.cub";
-  QString solarFilePath = "$cassini/calibration/vims/"+calVersion+
-     "/solar-spectrum/"+"solar."+yearString+"_v????.cub";
+  QString solarFilePath("");
+
+  if (g_calibration=="ORIGINAL") {
+    solarFilePath="$cassini/calibration/vims/"+g_calibration+"/solar_v????.cub";
+  }
+
+  else if (g_calibration == "RC19") {
+    solarFilePath = "$cassini/calibration/vims/"+g_calibration+
+       "/solar-spectrum/"+"solar."+yearString+"_v????.cub";
+  }
+
+  else if (g_calibration=="RC20" || g_calibration=="RC20FINAL") {
+    solarFilePath = "$cassini/calibration/vims/"+g_calibration+
+       "/solar-spectrum/"+g_filePrefix+".solar_v????.cub";
+  }
 
   FileName solarFileName(solarFilePath);
 
+
   solarFileName = solarFileName.highestVersion();
+
 
   calibInfo += PvlKeyword("SolarColorFile",
                           solarFileName.originalPath() + "/" + solarFileName.name());
@@ -419,14 +563,23 @@ void calculateSolarRemove(Cube *icube, ProcessByLine *p) {
  */
 void loadCalibrationValues() {
 
-  FileName calibFile("$cassini/calibration/vims/vimsCalibration????.trn");
+  FileName calibFile(QString("$cassini/calibration/vims/vimsRC20_????.trn"));
+
   calibFile = calibFile.highestVersion();
+#if 0
+  if (g_calibration == "RC19"){
+    FileName calibFile("$cassini/calibration/vims/vimsCalibration????.trn");
+    calibFile = calibFile.highestVersion();
+  }
+#endif
+
 
   //Pvl configFile;
   g_configFile.read(calibFile.expanded());
   PvlGroup &multipliers = g_configFile.findGroup("CalibrationMultipliers");
 
-  calVersion = (QString)multipliers["version"];
+  //calVersion = (QString)multipliers["version"];
+
 
   g_solar = multipliers["solar"][0].toDouble();
 
@@ -436,9 +589,7 @@ void loadCalibrationValues() {
 
   g_wavecal = multipliers["wave-cal"][0].toDouble();
 
-
-
-  calibInfo += PvlKeyword("CalibrationVersion", calVersion);
+  calibInfo += PvlKeyword("CalibrationVersion", g_calibration);
   calibInfo += PvlKeyword("SolarMultiplier",QString::number(g_solar,'f',2));
   calibInfo += PvlKeyword("IR_Multiplier",QString::number(g_ir,'f',2));
   calibInfo += PvlKeyword("VIS_Multiplier",QString::number(g_vis,'f',2));
@@ -456,21 +607,36 @@ void loadCalibrationValues() {
  */
 void updateWavelengths(Cube *icube) {
 
+
+
   PvlGroup &inst = icube->label()->findGroup("Instrument", Pvl::Traverse);
   bool vis = (inst["Channel"][0] != "IR");
 
 
   PvlGroup &bandBin = icube->label()->findGroup("BandBin",Pvl::Traverse);
 
-  QString bandwidthFile = "$cassini/calibration/vims/"+calVersion+"/band-wavelengths/wavelengths."+
+  QString bandwidthFile("");
+  QString averageBandwidthFile("");
+
+
+
+  if (g_calibration=="RC19") {
+
+    bandwidthFile = "$cassini/calibration/vims/"+g_calibration+"/band-wavelengths/wavelengths."+
       yearString+"_v????.cub";
+    averageBandwidthFile = "$cassini/calibration/vims/"+g_calibration+"/band-wavelengths/"+
+        "wavelengths_average_v????.cub";
+  }
 
-  QString averageBandwidthFile = "$cassini/calibration/vims/"+calVersion+"/band-wavelengths/"+
-      "wavelengths_average_v????.cub";
-
+  else if (g_calibration=="RC20" || g_calibration=="RC20FINAL") {
+    bandwidthFile = "$cassini/calibration/vims/"+g_calibration+"/band-wavelengths/"+g_filePrefix
+        +".wavelengths_v????.cub";
+    averageBandwidthFile = "$cassini/calibration/vims/"+g_calibration+
+        "/band-wavelengths/VIMS.wavelengths.average_v????.cub";
+  }
 
   FileName bandwidthFileName = FileName(bandwidthFile);
-  FileName averageBandwidthFileName = FileName(averageBandwidthFile);
+  FileName averageBandwidthFileName = FileName(averageBandwidthFile); 
   bandwidthFileName =bandwidthFileName.highestVersion();
   averageBandwidthFileName = averageBandwidthFileName.highestVersion();
 
@@ -548,25 +714,32 @@ void updateWavelengths(Cube *icube) {
  */
 void calculateSpecificEnergy(Cube *icube) {
   PvlGroup &inst = icube->label()->findGroup("Instrument", Pvl::Traverse);
-  //bool vis = (inst["Channel"][0] != "IR");
 
+  QString specEnergyFile("");
 
   double multiplier = 1.0;
   double coefficient = 1.0;
 
-  if(inst["GainMode"][0] == "HIGH") {
+  if (inst["GainMode"][0] == "HIGH") {
     coefficient /= 2;
   }
 
-  if(g_visBool && inst["SamplingMode"][0] == "HI-RES") {
+  if (g_visBool && inst["SamplingMode"][0] == "HI-RES") {
     coefficient *= 3;
   }
 
   if(g_visBool) {
     coefficient /= toDouble(inst["ExposureDuration"][1]) / 1000.0;
-  }
+    if (g_calibration=="ORIGINAL") {
+        specEnergyFile = "$cassini/calibration/vims/"+g_calibration+"/vis_perf_v????.cub";
+    }
+
+   }
+
+
   else {
 
+    qDebug() << "SHAPOOPY!";
   //Discrepancies between the VIMS and Spacecraft clock necessitated a
   //conversion multiplier, which is in the USGS: ISIS3 version of vimscal
   //but was not part of the University of Arizona pipeline.  Below is the
@@ -600,37 +773,54 @@ void calculateSpecificEnergy(Cube *icube) {
     */
 
     //USGS
-    coefficient /= (toDouble(inst["ExposureDuration"][0]) * 1.01725) / 1000.0 - 0.004;
+    if (g_calibration=="ORIGINAL") {
+      //University of Arizona
+      //coefficient /= (toDouble(inst["ExposureDuration"][0]) ) / 1000.0 - 0.004;
+    }
+    else {
+      coefficient /= (toDouble(inst["ExposureDuration"][0]) * 1.01725) / 1000.0 - 0.004;
+    }
 
-
-    //University of Arizona
-    //coefficient /= (toDouble(inst["ExposureDuration"][0]) ) / 1000.0 - 0.004;
   }
 
+  if (g_calibration=="ORIGINAL") {
+      specEnergyFile = "$cassini/calibration/vims/"+g_calibration+"/ir_perf_v????.cub";
+  }
 
+  else if(g_calibration=="RC19") {
 
-  //QString specEnergyFile = "$cassini/calibration/vims/ir_perf_v????.cub";
-
-
-
-  QString specEnergyFile = "$cassini/calibration/vims/"+calVersion+"/RC19-mults/RC19."
+  specEnergyFile = "$cassini/calibration/vims/"+g_calibration+"/RC19-mults/RC19."
       +yearString+"_v????.cub";
 
+  }
+  else if (g_calibration == "RC20" || g_calibration=="RC20FINAL") {
+    specEnergyFile = "$cassini/calibration/vims/"+g_calibration+"/RC19-mults/"+g_filePrefix+
+        ".calibration.multiplier.RC19_v????.cub";
+  }
 
   //B multiplier
-  //QString waveCalFile = "$cassini/calibration/vims/wavecal_v????.cub";
 
-  QString waveCalFile = "$cassini/calibration/vims/"+calVersion+"/wave-cal/wave.cal."+
+  QString waveCalFile("");
+
+  if (g_calibration=="ORIGINAL") {
+    waveCalFile = "$cassini/calibration/vims/"+g_calibration+"/wavecal_v????.cub";
+  }
+
+  if(g_calibration=="RC19") {
+    waveCalFile = "$cassini/calibration/vims/"+g_calibration+"/wave-cal/wave.cal."+
       yearString+"_v????.cub";
+  }
 
+  else if (g_calibration == "RC20" || g_calibration == "RC20FINAL") {
+    waveCalFile = "$cassini/calibration/vims/"+g_calibration+"/wave-cal/"+g_filePrefix+
+        ".wave-photon-cal_v????.cub";
+  }
 
-  FileName specEnergyFileName(specEnergyFile);
+  FileName specEnergyFileName(specEnergyFile); 
   specEnergyFileName = specEnergyFileName.highestVersion();
 
-
-  FileName waveCalFileName(waveCalFile);
+  FileName waveCalFileName(waveCalFile); 
   waveCalFileName = waveCalFileName.highestVersion();
-
 
   Cube specEnergyCube;
   specEnergyCube.open(specEnergyFileName.expanded());
@@ -677,10 +867,15 @@ void calculateSpecificEnergy(Cube *icube) {
     //  C = specEnergyStats.Average()
     //Equation 1 in the white paper (C = specificEnergyStats.Average(),
     //B = waveCalStats.Average() )
+    double bandCoefficient;
 
-    double bandCoefficient = coefficient * (multiplier*specEnergyStats.Average())
-        *(g_wavecal*waveCalStats.Average() );
-
+    if (g_calibration=="ORIGINAL") {
+      bandCoefficient = coefficient * specEnergyStats.Average() * waveCalStats.Average();
+    }
+    else {
+      bandCoefficient = coefficient * (multiplier*specEnergyStats.Average())
+              *(g_wavecal*waveCalStats.Average() );
+    }
 
     specificEnergyCorrections.push_back(bandCoefficient);
   }
