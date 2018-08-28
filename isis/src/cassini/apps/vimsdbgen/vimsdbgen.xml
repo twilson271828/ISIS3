@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application name="vimsdbgen" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://isis.astrogeology.usgs.gov/Schemas/Application/application.xsd">
+
+  <brief>
+    Outputs a PVL file that contains camera infomation. 
+  </brief>
+
+  <description>
+    This program requires the user supply a "level 1" cube.  That is, a cube in raw camera geometry.
+    The user can choose to run spiceinit on the input cube.  Spiceinit will use the system kernels,
+    so any user updates to SPICE information will be lost.  The default is to <b>not</b> run spiceinit.
+    This program will output various spacecraft and insrument related information.   Some of the
+    output information will be a compilation of all bands, this will be put in the "Common" object of the 
+    PVL.  Other infomation will be for a given band and placed in the "BandSet" object. the user
+    can use the "output options" check boxes to control the infomation that will be output to the 
+    PVL.  if the polygon option is chosen, the image polygon is output in well known text format.  
+    The following is an example of  the output given when vimsdbgen is ran:
+  </description>
+
+  <history>
+    <change name="Kris Becker" date="2010-06-07">
+      Original version
+    </change>
+  </history>
+
+  <category>
+    <categoryItem>Database</categoryItem>
+  </category>
+
+  <groups>
+    <group name="Files">
+      <parameter name="FROM">
+        <type>cube</type>
+        <fileMode>input</fileMode>
+        <internalDefault>None</internalDefault>
+        <brief>
+          Filename of a cube
+        </brief>
+        <description>
+          This is the name of a single ISIS Cassini VIMS image cube that will be 
+          added to database.  It is optional and useful for processing single 
+          files, one at a time.  It is intended to be used to selectively 
+          update cubes.
+        </description>
+        <filter>
+          *.cub *.CUB
+        </filter>
+      </parameter>
+      <parameter name="FROMLIST">
+        <type>filename</type>
+        <internalDefault>None</internalDefault>
+        <fileMode>input</fileMode>
+        <brief>
+          Name of file containing list of Cassini VIMS ISIS cubes
+        </brief>
+        <description>
+          This file contains a list of Cassini VIMS ISIS cube files that will be 
+          processed and added to the database file.  It can be used in addition 
+          to the FROM parameter.  
+        </description>
+        <filter>
+          *.lis
+        </filter>
+      </parameter>
+     <parameter name="CONFIG">
+        <type>filename</type>
+        <fileMode>input</fileMode>
+        <brief>
+          Input PVL file containing processing parameters
+        </brief>
+        <internalDefault>None</internalDefault>
+        <description>
+          This file contains parameters that will be used to specify or 
+          constrain processing of input files.  The target, number of bands 
+          expected/required, and geometric constraints will be used from this 
+          file.
+        </description>
+        <filter>
+          *.txt
+        </filter>
+      </parameter>
+      <parameter name="DBCONFIG">
+        <type>filename</type>
+        <fileMode>input</fileMode>
+        <brief>
+          Input existing VIMS database file to add to
+        </brief>
+        <internalDefault>None</internalDefault>
+        <description>
+          <p>
+            This file contains the specification of a PostgreSQL/Postgis 
+            database where the data will be written.
+          </p>
+        </description>
+        <filter>
+          *.pdb
+        </filter>
+      </parameter>
+      <parameter name="PROFILE">
+        <type>string</type>
+        <brief>
+          Name of database profile to use
+        </brief>
+        <internalDefault>None</internalDefault>
+        <description>
+          Name of specific Profile group to use for publication purposes of the 
+        result.  Support may vary put it is currently expected to be a 
+        PostgreSQL/Postgis database access profile that specifies login 
+        information to the database. 
+        </description>
+        <filter>
+          *.txt
+        </filter>
+      </parameter>
+
+      <parameter name="ERRLOG">
+        <type>filename</type>
+        <fileMode>output</fileMode>
+        <brief>
+          Detailed output error summary
+        </brief>
+        <internalDefault>None</internalDefault>
+        <description>
+          This file will contain a detailed listing of errors that occured and 
+          any specific error messages for each category of errors.  This can be 
+          useful to get the description of the errors and individual specific 
+          GIS GEOS exceptions.
+        </description>
+        <filter>
+          *.log
+        </filter>
+      </parameter>
+      </group>
+   </groups>
+</application>

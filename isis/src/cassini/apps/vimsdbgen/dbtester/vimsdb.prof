@@ -1,0 +1,29 @@
+Object = Database
+  Name = Vimsdb
+  Dbname = vimsdb
+  Type = PostgreSQL
+#  Host = "algol.wr.usgs.gov"
+  Host = "localhost"
+#  Port = 3309
+  Description = "VIMS database of every pixel on Titan's surface"
+  DefaultProfile = vimsread
+
+  Group = Profile
+    Name = Vimsread
+    User = "vimsread"
+    Access = ReadOnly
+    Password = "public"
+  EndGroup
+
+  Group = Profile
+    Name = VimsWrite
+    User = "vimswrite"
+    Access = Update
+  EndGroup
+
+  Group = Profile
+    Name = VimsAdmin
+    User = "vimsmgr"
+    Access = Admin
+  EndGroup
+EndObject

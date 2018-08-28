@@ -1,0 +1,18 @@
+
+
+Total Processed: 297896
+Total Valid:     77723
+
+Group = PDBErrors
+  BadSampRes     = 35637
+  BadLineRes     = 12487
+  BadResRatio    = 516
+  NoCenterPt     = 163346
+  NoUpperLeftPt  = 3521
+  NoUpperRightPt = 1401
+  NoLowerRightPt = 2148
+  NoLowerLeftPt  = 1107
+  GeosException  = 12
+  PartialGeom    = 1
+End_Group
+

@@ -1,0 +1,88 @@
+// Protocol buffer descriptor for geometric pixel database
+
+//  Base storage of vector components
+  message Vector {
+    required double x   = 1;  // X component of vector
+    required double y   = 2;  // Y component of vector
+    required double z   = 3;  // Z component of vector
+  }
+
+// Spacecraft/sun positions
+  message Position {
+    optional Vector    scpos    = 1;   // Spacecraft Position Vector
+    optional Vector    sunpos   = 2;   // Sun Position Vector
+  }
+
+//  Define geometry stored at each pixel coordinate
+  message Geometry {
+    required float  line   = 2;	   // Line coordinate
+    required float  sample = 3;	   // Sample coordinate
+    optional double latitude = 4;  // Latitude (NULL if no geometry)
+    optional double longitude = 5; // Longitude (DNE if invalid)
+    optional double resolution = 6;  // Average resolution (DNE if invalid)
+    optional double incidence = 7; // incidence (DNE if invalid)
+    optional double emission = 8;  // Emission (DNE if invalid)
+    optional double phase = 9;	   // Phase (DNE if invalid)
+    optional double radius = 10;	   // Radius (DNE if invalid)
+    optional double distance = 11;  // Distance to target center
+    optional Position locale = 12;  //  S/c and sun positon
+  }
+
+// the geometry for a pixel
+  message Points {
+    optional Geometry center = 1;      //  Center pixel geometry
+    optional Geometry upperleft = 2;   //  Upper Left pixel geometry
+    optional Geometry upperright = 3;  //  Upper right pixel geometry
+    optional Geometry lowerright = 4;  //  Lower right pixel geometry
+    optional Geometry lowerleft = 5;   //  Lower left pixel geometry
+
+  }
+
+//  All data stored for a pixel
+  message Pixel {
+    required float     line = 1;       // Center Line coordinate of pixel
+    required float     sample = 2;     // Center Sample Coordinate of pixel 
+    repeated double    spectrum = 3;   // Stored spectrum of data
+    optional double    sampres = 4;    // Sample resolution
+    optional double    lineres = 5;    // Line resolution
+    optional double    etTime  = 6;    // Emphemeris time of observation
+    optional Points    points = 7;     // Pixel geometries 
+    optional bytes     footprint = 8;  // GIS footprint in WKB Hex
+  }
+ 
+//  Create a file-based GIS element
+  message GISGeometry {
+    required int32    ngeoms = 1;  // Number pixels in geom ; should = #Points 
+    required bytes    thegeom = 2; // The full geometry in WKB Hex
+  } 
+
+//  Define an ISIS image file,  Note that some content comes directly from
+//  the ISIS label.  I did not add them here, but they are handled directly
+//  in a different manner in vimsdbgen.
+  message File {
+    required string      name = 1;	   // Base name of VIMS cube
+    optional string      path = 2;	   // Path of original file
+    required string      serialnumber = 3; // ISIS serial number (index key)
+    required int32       lines = 4;	   // Number of lines in file
+    required int32       samples = 5;	   // Number of samples in file
+    required int32       bands = 6;	   // Number of bands in file
+    repeated Pixel       pixels = 7;       // Pixel data & geometries
+    optional GISGeometry geom = 8;         // Union of all pixel GIS geometry
+  }
+
+message PixelDB {
+// Version tracking so we know which version of the code we are dealing with
+  message Pedigree {
+    required float  version = 1 [default = 0.2];
+    required string date    = 2 [default = "2012/08/25"];
+  }
+
+// Declaration of Pedigree for tracking purposes
+  required Pedigree pedigree = 1;   // Tracks versions of our protocol
+
+//  Define the complete database right here
+  repeated File files = 2;          // Individual ISIS cube files
+}
+
+
+

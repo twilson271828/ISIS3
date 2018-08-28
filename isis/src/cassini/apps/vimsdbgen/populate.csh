@@ -1,0 +1,1 @@
+perl -n -MFile::Basename -e ' chomp; ($file,$dir,$ext) = fileparse($_, qr/\.[^.]*/); print "./vimsdbgen from=$_ config=vimsdb.conf dbconfig=vimsdb.conf -log=Population/Logs/${file}.prt\n"' vimsir.lis | xargs -P 2 -0  echo 

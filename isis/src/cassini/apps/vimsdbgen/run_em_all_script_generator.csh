@@ -1,0 +1,1 @@
+ perl -n -MFile::Basename -e 'chomp; ($file,$dir,$ext) = fileparse($_, qr/\.[^.]*/); print "./vimsdbgen from=$_ config=vimsdb.conf dbconfig=vimsdb.conf errlog=Population/Logs/${file}.err -log=Population/Logs/${file}.prt\n"' allvims.lis > run_em_all.csh

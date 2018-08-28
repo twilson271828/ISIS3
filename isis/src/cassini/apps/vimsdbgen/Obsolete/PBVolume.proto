@@ -1,0 +1,22 @@
+// ProtocolBuffer message volume mapper
+// This message structure provides support for ginormous message structures
+// that exceed 2GB (int32) serialized message sizes.  It defines structures
+// that break up the message into separate serialized parts to write and then
+// read from a disk file.
+
+
+// A PBPartition is one serialized data message under the 2GB limit
+message PBPartition {
+ required  string pbdescr = 1 [default = ""]; // ProtoBuffer descriptor
+ required  int32  maxsize = 2 [default = 67108864]; // (64MB) size limit
+ required  int32  number  = 3 [default = 1];  // Partion number
+ required  int32  nbytes  = 4 [default = 0];  // Number serialized bytes
+ optional  int32  count   = 5 [default = 0];  // Number elements
+}
+
+// The PBVolume is a collection of PBPartitions comprising the complete
+// data set
+message PBVolume {
+  repeated PBPartition maps = 1;  // Partion maps to PB message
+}
+			
