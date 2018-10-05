@@ -184,6 +184,7 @@ namespace Isis {
       double parentLine = p_alphaCube->AlphaLine(line);
       bool success = false;
       success = p_detectorMap->SetParent(parentSample, parentLine);
+
       // Convert from parent to detector
       if (success) {
         double detectorSample = p_detectorMap->DetectorSample();

@@ -65,7 +65,7 @@ void IsisMain ()
   progress.CheckStatus();
 
   for (int i = 0 ; i < flist.size() ; i++) {
-    cout << flist[i].toString() << "\n";
+
     db.ProcessBySpectra(flist[i].toString().toStdString());
     progress.CheckStatus();
   }

@@ -24,6 +24,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <QDebug>
 #include <QString>
 
 using namespace std;
@@ -93,6 +94,8 @@ int DbPublisher::insert(const File &vfile, const DbProfile &keys) {
   sql += sqlQuote(vfile.geom().thegeom(), "");
 
   sql = "SELECT merge_file(" + sql + ")";
+
+
   executeSql(sql);
 
   //  Now process each pixel
@@ -106,6 +109,8 @@ int DbPublisher::insert(const File &vfile, const DbProfile &keys) {
 
 int DbPublisher::insert(const File &vfile, const Pixel &pixel) {
   IString sql;
+
+
 
   sql += sqlQuote(vfile.name());
   sql += sqlQuote(vfile.serialnumber());
@@ -282,6 +287,7 @@ std::string DbPublisher::getValidValue(const std::string &name,
 
 bool DbPublisher::executeSql(const std::string &statement,
                              const bool &useTransactions)  {
+
 
   m_status = -1;
   m_lastError = "";

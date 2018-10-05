@@ -25,6 +25,8 @@
 #include <sstream>
 #include <iostream>
 
+#include <QDebug>
+
 using std::ostringstream;
 
 #include "DbProfile.h"
@@ -94,6 +96,7 @@ namespace Isis {
    * @param value Value to add to the keyword
    */
   void DbProfile::add(const QString &key, const QString &value) {
+
     if(_keys.exists(key)) {
       _keys.get(key).addValue(value);
     }

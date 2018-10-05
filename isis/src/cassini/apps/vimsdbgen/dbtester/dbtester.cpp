@@ -14,7 +14,7 @@
 
 using namespace std;
 
-#include "UserInterface.h"
+//#include "UserInterface.h"
 #include "SessionLog.h"
 #include "IString.h"
 #include "iTime.h"
@@ -30,47 +30,48 @@ using namespace Isis;
 void IsisMain() {
 
 
-  const std::string version("$Revision: 1.6 $");
   UserInterface &ui = Application::GetUserInterface();
+  QString version("$Revision: 1.6 $");
 
-  string dbProf("");
-  if (ui.WasEntered("PROFILE")) dbProf = ui.GetString("PROFILE").toStdString();
+  QString pvlSource = ui.GetFileName("FROM");
 
-#if 0
-  string pvlSource = ui.GetFilename("FROM");
+  QString dbMap("");
+  if (ui.WasEntered("DBMAP")) {
+    dbMap = ui.GetFileName("DBMAP");
+  }
 
-  string dbMap("");
-  if (ui.WasEntered("DBMAP")) dbMap = ui.GetFilename("DBMAP");
+  QString dbConf("");
+  if (ui.WasEntered("DBCONFIG")) dbConf = ui.GetFileName("DBCONFIG");
 
-  string dbConf("");
-  if (ui.WasEntered("DBCONFIG")) dbConf = ui.GetFilename("DBCONFIG");
-
-  string dbProf("");
+  QString dbProf("");
   if (ui.WasEntered("PROFILE")) dbProf = ui.GetString("PROFILE");
 
-  string dbTable("");
+  QString dbTable("");
   if (ui.WasEntered("TABLES")) dbTable = ui.GetString("TABLES");
 
-  string dbMissing("EXCLUDE");
+  QString dbMissing("EXCLUDE");
   dbMissing = ui.GetString("MISSING");
 
-  string dbMode("COMMIT");
+  QString dbMode("COMMIT");
   dbMode = ui.GetString("MODE");
-  bool commit = iString::Equal(dbMode, "COMMIT");
+  //bool commit = IString::Equal(dbMode, "COMMIT");
+  bool commit = (dbMode=="COMMIT");
 
-  string dbVerbose("NO");
+  QString dbVerbose("NO");
   dbVerbose = ui.GetString("VERBOSE");
-  bool verbose = iString::Equal(dbVerbose, "YES");
+  //bool verbose = IString::Equal(dbVerbose, "YES");
+  bool verbose = (dbVerbose=="YES");
 
-  string dbShowSql("NO");
+  QString dbShowSql("NO");
   dbShowSql = ui.GetString("SHOWSQL");
-  bool showsql = iString::Equal(dbShowSql, "YES");
+  //bool showsql = IString::Equal(dbShowSql, "YES");
+  bool showsql = (dbShowSql=="YES");
 
   // If we are not commiting or want'n to see the SQL, turn verbose on
   if (!commit) verbose = true;
   if (showsql) verbose = true;
 
-#endif
+
 
   DatabaseFactory *factory = DatabaseFactory::getInstance();
   vector<QString> drivers = factory->available();
@@ -87,7 +88,7 @@ void IsisMain() {
   copy(driversStdStringRepresentation.begin(), driversStdStringRepresentation.end(), ostream_iterator<string>(cout, "\n"));
 
   Database::addAccessConfig("vimsdb.prof");
-  DbProfile profile = Database::getProfile(QString(dbProf.c_str()));
+  DbProfile profile = Database::getProfile(dbProf);
 
   //auto_ptr<Database> db = auto_ptr<Database> (new Database(profile,Database::Connect));
   unique_ptr<Database> db (new Database(profile,Database::Connect));
@@ -105,14 +106,14 @@ void IsisMain() {
 
 
 
-#if 0
+
   try {
 
 //  First thing to do is add the access profile if provided by user
-    if (!dbConf.empty()) {
+    if (!dbConf.isEmpty()) {
       if (!Database::addAccessConfig(dbConf)) {
-        std::string mess = "Unable to open/add DBCONF file " + dbConf;
-        throw iException::Message(iException::User, mess, _FILEINFO_);
+        QString mess = "Unable to open/add DBCONF file " + dbConf;
+        throw IException(IException::User, mess, _FILEINFO_);
       }
     }
 // Get the default profile.
@@ -135,7 +136,7 @@ void IsisMain() {
     pvlmap.addVariable("FROM", pvlSource);
 
 // Determine the map file and add it
-    if (dbMap.empty()) {
+    if (dbMap.isEmpty()) {
       try {
         dbMap = profile("DBMAP");
       } catch (iException &ie) {
@@ -225,6 +226,6 @@ void IsisMain() {
     throw iException::Message(iException::Programmer, "Unhandled exception",
                                _FILEINFO_);
   }
-#endif
+
   return;
 }

@@ -27,6 +27,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <QDebug>
+
 #include "tnt/tnt_array1d.h"
 
 #include "BoxcarCachingAlgorithm.h"
@@ -119,8 +121,13 @@ void PixelDBManager::ProcessBySpectra(const std::string &ifile) {
     keys.add("UTCStartTime", iTime(keys("StartTime")).UTC());
     keys.add("UTCStopTime", iTime(keys("StopTime")).UTC());
     
-
+     //
     //  Add this file to the database
+
+
+
+
+
     m_totalValid += m_publisher->publish( vfile, keys );
   }
   return;

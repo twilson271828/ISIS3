@@ -2,9 +2,8 @@ Object = Database
   Name = Vimsdb
   Dbname = vimsdb
   Type = PostgreSQL
-#  Host = "algol.wr.usgs.gov"
-  Host = "localhost"
-#  Port = 3309
+  Host = "pinto.wr.usgs.gov"
+  Port = 5432
   Description = "VIMS database of every pixel on Titan's surface"
   DefaultProfile = vimsread
 
@@ -19,11 +18,13 @@ Object = Database
     Name = VimsWrite
     User = "vimswrite"
     Access = Update
+    Password="23812383"
   EndGroup
 
   Group = Profile
     Name = VimsAdmin
     User = "vimsmgr"
     Access = Admin
+    Password="271828"
   EndGroup
 EndObject

@@ -29,6 +29,8 @@
 #include <iostream>
 #include <sstream>
 
+#include<QDebug>
+
 #include <geos_c.h>
 #include "Distance.h"
 #include "FileName.h"
@@ -215,7 +217,12 @@ bool PixelMaker::ComputeGeometry(const double line, const double sample,
 bool PixelMaker::ComputePoint(const double line, const double sample, 
                               Camera &camera, Geometry &point) const {
 
-  if (!camera.SetImage(sample, line)) return (false);
+  if (!camera.SetImage(sample, line)){
+
+    //qDebug() << "PixelMaker::ComputePoint(...) failed:  [" << line << " , " << sample << "]";
+
+    return (false);
+  }
   point.set_line(line);
   point.set_sample(sample);
   point.set_latitude(camera.UniversalLatitude());
