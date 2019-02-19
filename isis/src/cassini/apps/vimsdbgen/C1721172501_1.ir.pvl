@@ -1,0 +1,123 @@
+Object = Caminfo
+  Object = Parameters
+    Program     = caminfo
+    IsisVersion = "3.4.2.4758 beta | 2012-08-28"
+    RunDate     = 2012-10-20T06:06:15
+    IsisId      = Cassini-Huygens/VIMS/IR/1721172519.219
+    From        = C1721172501_1.ir.cub
+    Lines       = 13
+    Samples     = 25
+    Bands       = 1
+  End_Object
+
+  Object = Camstats
+    MinimumLatitude   = -65.389224507405
+    MaximumLatitude   = 53.062049024927
+    MinimumLongitude  = 6.6353375996825
+    MaximumLongitude  = 348.15555738543
+    MinimumResolution = 1426285.8591756
+    MaximumResolution = 1427248.93298
+    MinimumPhase      = 71.552065260625
+    MaximumPhase      = 71.641048620606
+    MinimumEmission   = 13.833738585215
+    MaximumEmission   = 79.936691171706
+    MinimumIncidence  = 17.620581557547
+    MaximumIncidence  = 151.42025020305
+    LocalTimeMinimum  = 10.17277708234
+    LocalTimeMaximum  = 22.040582789458
+  End_Object
+
+  Object = Geometry
+    BandsUsed                  = 1
+    ReferenceBand              = 1
+    OriginalBand               = 1
+    Target                     = TITAN
+    StartTime                  = 2012-07-16T22:35:53.5190474
+    EndTime                    = 2012-07-16T22:39:49.517574
+    CenterLine                 = 6.5
+    CenterSample               = 12.5
+    CenterLatitude             = 13.331210688122
+    CenterLongitude            = 57.955740223149
+    CenterRadius               = 2575000.0000003
+    RightAscension             = 274.89547899991
+    Declination                = 18.704420651573
+    UpperLeftLongitude         = NULL
+    UpperLeftLatitude          = NULL
+    LowerLeftLongitude         = NULL
+    LowerLeftLatitude          = NULL
+    LowerRightLongitude        = NULL
+    LowerRightLatitude         = NULL
+    UpperRightLongitude        = NULL
+    UpperRightLatitude         = NULL
+    PhaseAngle                 = 71.597352234397
+    EmissionAngle              = 31.150994023606
+    IncidenceAngle             = 76.191092085339
+    NorthAzimuth               = 198.40635350966
+    OffNadir                   = 0.025101299941269
+    SolarLongitude             = 43.663659404525
+    LocalTime                  = 17.270662715646
+    TargetCenterDistance       = 3040479.8278838
+    SlantDistance              = 3038275.8330149
+    SampleResolution           = 1426420.5788802
+    LineResolution             = 1426420.5788802
+    PixelResolution            = 1426420.5788802
+    MeanGroundResolution       = 1426672.9065798
+    SubSolarAzimuth            = 160.2287702716
+    SubSolarGroundAzimuth      = 282.67147362646
+    SubSolarLatitude           = 15.207546733161
+    SubSolarLongitude          = 338.89579948846
+    SubSpacecraftAzimuth       = 86.93738496598
+    SubSpacecraftGroundAzimuth = 205.48685770449
+    SubSpacecraftLatitude      = -14.871843591932
+    SubSpacecraftLongitude     = 44.650302431032
+    ParallaxX                  = -1.8503257525521
+    ParallaxY                  = 34.583147631094
+    ShadowX                    = 219.3684980344
+    ShadowY                    = 78.853111089485
+    HasLongitudeBoundary       = FALSE
+    HasNorthPole               = FALSE
+    HasSouthPole               = FALSE
+  End_Object
+
+  Object = Polygon
+    CentroidLine      = NULL
+    CentroidSample    = NULL
+    CentroidLatitude  = 9.0597584578495
+    CentroidLongitude = 170.72283610126
+    CentroidRadius    = NULL
+    SurfaceArea       = 44559685.29156 <km^2>
+    GlobalCoverage    = 53.478324 <percent>
+    SampleIncrement   = 3
+    LineIncrement     = 1
+    GisFootprint      = "MULTIPOLYGON (((334.5021315202637311
+                         50.6593629919002737, 360.0000000000000000
+                         57.1494130169636705, 360.0000000000000000
+                         90.0000000000000000, 0.0000000000000000
+                         90.0000000000000000, 0.0000000000000000
+                         57.1494130169636705, 64.7456679036177718
+                         73.6293248156524669, 113.3525498407929604
+                         25.1789715063977511, 95.9125596365358888
+                         -19.0546722495362957, 109.4593318878085171
+                         -65.3724683034440517, 287.8052442010096570
+                         -60.6203313078495611, 315.2677578400064249
+                         0.2074833689889728, 334.5021315202637311
+                         50.6593629919002737)))"
+
+    Group = Mapping
+      TargetName         = TITAN
+      EquatorialRadius   = 2575000.0 <meters>
+      PolarRadius        = 2575000.0 <meters>
+      LatitudeType       = Planetocentric
+      LongitudeDirection = PositiveEast
+      LongitudeDomain    = 360
+      MinimumLatitude    = -76.507930786109
+      MaximumLatitude    = 37.29106027642
+      MinimumLongitude   = 26.738550804515
+      MaximumLongitude   = 344.07070888609
+      PixelResolution    = 1426254.6047299
+      ProjectionName     = Sinusoidal
+      CenterLongitude    = 57.955740223149
+    End_Group
+  End_Object
+End_Object
+End
