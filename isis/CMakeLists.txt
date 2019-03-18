@@ -159,6 +159,7 @@ include(CTest)
 set(thirdPartyCppFlags -Wall
                        -fPIC
                        -std=c++11
+                       -fopenmp
                        -DISIS_LITTLE_ENDIAN=1
                        -Wno-unused-parameter
                        -Wno-overloaded-virtual
